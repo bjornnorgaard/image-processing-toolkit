@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -7,47 +8,86 @@ namespace Greyscale
 {
     public class GreyscaleConverter
     {
+        private List<string> NamesOfAlreadyConvertedFiles { get; set; } = new List<string>();
+        private string[] FilePaths { get; set; }
+        private List<string> FileNames { get; set; }
+        private int TotalNumbersOfFiles { get; set; }
+        private int FilesConverted { get; set; }
+
         /// <summary>
         /// Will make greyscale versions of all images in the given folder.
         /// The new images will be named as such: "'oldname'-greyscale.ext".
         /// </summary>
-        /// <param name="path">Folder which images are located in.</param>
-        /// <param name="fileNameExtension">This string will be appended to the old filename.</param>
-        public void ConvertImagesInFolderToGreyscale(string path, string fileNameExtension = "-greyscale")
+        /// <param name="folderPath">Folder which images are located in.</param>
+        /// <param name="fileNameAddon">This string will be appended to the old filename.</param>
+        public void ConvertImagesInFolderToGreyscale(string folderPath, string fileNameAddon = "-greyscale")
         {
             #region Console prints
 
             Console.WriteLine($"Entered method: {nameof(ConvertImagesInFolderToGreyscale)}().");
-            Console.WriteLine($"Given path: {path}");
+            Console.WriteLine($"Given folderPath: {folderPath}");
 
             #endregion
 
             #region Gathering data about files
 
-            var filesPaths = Directory.GetFiles(path);
-            var fileNames = filesPaths.Select(Path.GetFileName).ToList();
-            var totalNumbersOfFiles = filesPaths.Length;
-            var filesConverted = 0;
+            FilePaths = Directory.GetFiles(folderPath);
+            FileNames = FilePaths.Select(Path.GetFileName).ToList();
+            TotalNumbersOfFiles = FilePaths.Length;
+            FilesConverted = 0;
 
             #endregion
 
-            foreach (var fileName in fileNames)
+            #region Find already converted files
+            
+            foreach (var name in FileNames)
             {
-                #region Check if file already has been converted or is of invalid type
-
-                if (fileName.Contains(fileNameExtension) || fileName.Contains(".gif"))
+                if (name.Contains(fileNameAddon))
                 {
-                    totalNumbersOfFiles--;
+                    NamesOfAlreadyConvertedFiles.Add(name);
+                }
+            }
+
+            #endregion
+
+            foreach (var fileName in FileNames)
+            {
+                #region Separating name and extension
+
+                var nameAndExtension = fileName.Split('.');
+                var originalFileName = nameAndExtension[0];
+                var extension = nameAndExtension[1];
+
+                #endregion
+
+                #region Check if already converted and filetype
+
+                // Image is greyscale
+                if (NamesOfAlreadyConvertedFiles.Contains(fileName)) 
+                {
+                    TotalNumbersOfFiles--;
+                    continue;
+                }
+                // Image has greyscale version
+                if (NamesOfAlreadyConvertedFiles.Contains(originalFileName + fileNameAddon+ "." + extension)) 
+                {
+                    TotalNumbersOfFiles--;
+                    continue;
+                }
+                // Image is bad type
+                if (fileName.Contains(".gif"))
+                {
+                    TotalNumbersOfFiles--;
                     continue;
                 }
 
                 #endregion
-
+                
                 #region Load image
 
-                Console.Write($"\nConverting file ({++filesConverted}/{totalNumbersOfFiles}): {fileName}");
+                Console.Write($"\nConverting file ({++FilesConverted}/{TotalNumbersOfFiles}): {fileName}");
 
-                var image = new Bitmap(path + fileName, true);
+                var image = new Bitmap(folderPath + fileName, true);
 
                 #endregion
 
@@ -55,6 +95,8 @@ namespace Greyscale
                 {
                     for (var y = 0; y < image.Height; y++)
                     {
+                        #region Convert pixel(x, y) to greyscale
+
                         var pixel = image.GetPixel(x, y);
 
                         var alpha = pixel.A;
@@ -65,6 +107,8 @@ namespace Greyscale
                         var average = (red + green + blue) / 3;
 
                         image.SetPixel(x, y, Color.FromArgb(alpha, average, average, average));
+
+                        #endregion
                     }
 
                     #region Dots showing progress
@@ -82,10 +126,7 @@ namespace Greyscale
 
                 #region Saving file
 
-                var nameAndExtension = fileName.Split('.');
-                var name = nameAndExtension[0];
-                var extension = nameAndExtension[1];
-                image.Save(path + name + fileNameExtension + "." + extension);
+                image.Save(folderPath + originalFileName + fileNameAddon + "." + extension);
                 Console.Write(" done!");
 
                 #endregion
