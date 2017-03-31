@@ -13,7 +13,8 @@ namespace Greyscale
         private List<string> FileNames { get; set; }
         private int TotalNumbersOfFiles { get; set; }
         private int FilesConverted { get; set; }
-
+        private Bitmap Image { get; set; }
+        
         /// <summary>
         /// Will make greyscale versions of all images in the given folder.
         /// The new images will be named as such: "'oldname'-greyscale.ext".
@@ -28,7 +29,7 @@ namespace Greyscale
             Console.WriteLine($"Given folderPath: {folderPath}");
 
             #endregion
-
+            
             #region Gathering data about files
 
             FilePaths = Directory.GetFiles(folderPath);
@@ -38,8 +39,15 @@ namespace Greyscale
 
             #endregion
 
+            #region Creating folder for greyscale files
+
+            var folderForGreyscaleFiles = Directory.GetParent(Directory.GetParent(FilePaths.First()).ToString()).ToString() + $"\\{fileNameAddon}\\";
+            Directory.CreateDirectory(folderForGreyscaleFiles);
+
+            #endregion
+
             #region Find already converted files
-            
+
             foreach (var name in FileNames)
             {
                 if (name.Contains(fileNameAddon))
@@ -87,17 +95,17 @@ namespace Greyscale
 
                 Console.Write($"\nConverting file ({++FilesConverted}/{TotalNumbersOfFiles}): {fileName}");
 
-                var image = new Bitmap(folderPath + fileName, true);
+                Image = new Bitmap(folderPath + fileName, true);
 
                 #endregion
 
-                for (var x = 0; x < image.Width; x++)
+                for (var x = 0; x < Image.Width; x++)
                 {
-                    for (var y = 0; y < image.Height; y++)
+                    for (var y = 0; y < Image.Height; y++)
                     {
                         #region Convert pixel(x, y) to greyscale
 
-                        var pixel = image.GetPixel(x, y);
+                        var pixel = Image.GetPixel(x, y);
 
                         var alpha = pixel.A;
                         var red = pixel.R;
@@ -106,7 +114,7 @@ namespace Greyscale
 
                         var average = (red + green + blue) / 3;
 
-                        image.SetPixel(x, y, Color.FromArgb(alpha, average, average, average));
+                        Image.SetPixel(x, y, Color.FromArgb(alpha, average, average, average));
 
                         #endregion
                     }
@@ -115,7 +123,7 @@ namespace Greyscale
 
                     for (var i = 1; i < 10; i++)
                     {
-                        if (x == image.Width / i)
+                        if (x == Image.Width / i)
                         {
                             Console.Write(".");
                         }
@@ -125,8 +133,9 @@ namespace Greyscale
                 }
 
                 #region Saving file
-
-                image.Save(folderPath + originalFileName + fileNameAddon + "." + extension);
+                
+                var formattableString = $@"{folderForGreyscaleFiles}\{originalFileName}{fileNameAddon}.{extension}";
+                Image.Save(formattableString);
                 Console.Write(" done!");
 
                 #endregion
