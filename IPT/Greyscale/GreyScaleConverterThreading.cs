@@ -1,0 +1,7 @@
+namespace Greyscale
+{
+    class GreyScaleConverterThreading
+    {
+        
+    }
+}
