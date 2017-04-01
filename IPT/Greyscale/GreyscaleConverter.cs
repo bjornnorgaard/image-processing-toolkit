@@ -14,7 +14,7 @@ namespace Greyscale
         private int TotalNumbersOfFiles { get; set; }
         private int FilesConverted { get; set; }
         private Bitmap Image { get; set; }
-        
+
         /// <summary>
         /// Will make greyscale versions of all images in the given folder.
         /// The new images will be named as such: "'oldname'-greyscale.ext".
@@ -29,7 +29,7 @@ namespace Greyscale
             Console.WriteLine($"Given folderPath: {folderPath}");
 
             #endregion
-            
+
             #region Gathering data about files
 
             FilePaths = Directory.GetFiles(folderPath);
@@ -71,13 +71,13 @@ namespace Greyscale
                 #region Check if already converted and filetype
 
                 // Image is greyscale
-                if (NamesOfAlreadyConvertedFiles.Contains(fileName)) 
+                if (NamesOfAlreadyConvertedFiles.Contains(fileName))
                 {
                     TotalNumbersOfFiles--;
                     continue;
                 }
                 // Image has greyscale version
-                if (NamesOfAlreadyConvertedFiles.Contains(originalFileName + fileNameAddon+ "." + extension)) 
+                if (NamesOfAlreadyConvertedFiles.Contains(originalFileName + fileNameAddon + "." + extension))
                 {
                     TotalNumbersOfFiles--;
                     continue;
@@ -90,12 +90,12 @@ namespace Greyscale
                 }
 
                 #endregion
-                
+
                 #region Load image
 
                 Console.Write($"\nConverting file ({++FilesConverted}/{TotalNumbersOfFiles}): {fileName}");
 
-                Image = new Bitmap(folderPath + fileName, true);
+                Image = new Bitmap(folderPath + "\\" + fileName, true);
 
                 #endregion
 
@@ -133,7 +133,7 @@ namespace Greyscale
                 }
 
                 #region Saving file
-                
+
                 var formattableString = $@"{folderForGreyscaleFiles}\{originalFileName}{fileNameAddon}.{extension}";
                 Image.Save(formattableString);
                 Console.Write(" done!");
