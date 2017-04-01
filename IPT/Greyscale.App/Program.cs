@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace Greyscale.App
 {
@@ -6,11 +8,20 @@ namespace Greyscale.App
     {
         static void Main(string[] args)
         {
-            // Will get path of 'img' folder, placed in default 'Documents' directory.
-            var path = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}" + @"\img\originals\";
+            const string path = @"C:\Users\Nørgaard\Documents\img\originals";
 
-            var greyscaleConverter = new GreyscaleConverter();
-            greyscaleConverter.ConvertImagesInFolderToGreyscale(path, "grey");
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            var multi = new GreyScaleConverterThreading(path, "grey");
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.Elapsed);
+
+            stopwatch.Start();
+            var single = new GreyscaleConverter();
+            single.ConvertImagesInFolderToGreyscale(path, "scale");
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.Elapsed);
         }
     }
-}
+}   
